@@ -2,9 +2,6 @@
 //  RUDP.hpp
 //  ReliableUDP
 //
-//  Created by Wenzhe Lu on 2018/3/22.
-//  Copyright © 2018年 Wenzhe Lu. All rights reserved.
-//
 
 #ifndef RUDP_hpp
 #define RUDP_hpp
