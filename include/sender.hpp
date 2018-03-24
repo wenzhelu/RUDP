@@ -16,13 +16,12 @@
 class Sender {
 public:
     char *userBuff;
-    size_t userDataLen;
+    uint userDataLen;
     std::mutex busy;    // if there are other files in transit, this will lock
     bool pending;       // if their is data pending to send
     bool resend;
-    bool close;         // close flag set by RUDP
-    size_t curPtr;      // real pointer to the databuff, notice the difference to the sendbase
-    size_t diff;        // the difference of sendBase with the dataBuff, for mapping purpose
+    uint curPtr;      // real pointer to the databuff, notice the difference to the sendbase
+    uint diff;        // the difference of sendBase with the dataBuff, for mapping purpose
     // so that the "real" send base would be RUDP::sendBase - diff
     
     Sender();
@@ -33,6 +32,11 @@ public:
     void send(char*, size_t);
     
     void sending();
+    
+private:
+    // short cut
+    // calculate how many bytes left in the congestion window to send.
+    uint byteIncWnd();
 };
 
 #endif /* sender_hpp */

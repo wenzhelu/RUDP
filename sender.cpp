@@ -16,15 +16,7 @@
 #include <thread>
 #include <chrono>   // for timing
 
-//Sender::Sender(char *buffer, size_t len) {
-//    send(buffer, len);
-//}
-//
-//Sender::Sender(char *file) {
-//    send(file);
-//}
-
-Sender::Sender() : userBuff(nullptr), userDataLen(0), close(false), resend(false), pending(false), diff(0) {}
+Sender::Sender() : userBuff(nullptr), userDataLen(0), resend(false), pending(false), diff(0) {}
 
 // note that we only support sending file with length in unsigned int range
 void Sender::send(char *file) {
@@ -46,7 +38,7 @@ void Sender::send(char *file) {
     userDataLen = st.st_size;
     pending = true;
     diff = RUDP::sendBase;
-    curPtr = 0;
+    curPtr = RUDP::sendBase;
 }
 
 void Sender::send(char *buffer, size_t len) {
@@ -56,19 +48,19 @@ void Sender::send(char *buffer, size_t len) {
     userDataLen = len;
     pending = true;
     diff = RUDP::sendBase;
-    curPtr = 0;
+    curPtr = RUDP::sendBase;
 }
 
 // the sending thread will loop in this function
 void Sender::sending() {
-    while (!close) {
+    while (!RUDP::close) {
         this_thread::sleep_for(chrono::milliseconds(RUDP::RTT / 2)); // sleep time need to test
         // we are making somehow dangerous assumption here.
         // the listener may need to change the curPtr when
         // packet loss happened
         if (pending) {
             // data pending to send, copy data to the buff
-            if (RUDP::sendBase - diff == userDataLen) {
+            if (RUDP::sendBase - diff >= userDataLen) {
                 // all buffer received
                 // no data pending to send
                 // unlock busy
@@ -80,15 +72,16 @@ void Sender::sending() {
                 busy.unlock();
                 goto NoData;
             }
+            RUDP::setDataBit(1);
             
             if (resend) {
                 // packet loss, request resend by listener
-                curPtr = RUDP::sendBase - diff;
+                curPtr = RUDP::sendBase;
                 resend = false;
             }
             
-            char *srcBegin = userBuff + curPtr, *destBegin = RUDP::buff + RUDP::HEADER_LEN;
-            uint len = std::min((uint)1460, std::min(RUDP::cWnd, (uint)(userDataLen - curPtr)));
+            char *srcBegin = userBuff + (curPtr - diff), *destBegin = RUDP::buff + RUDP::HEADER_LEN;
+            uint len = std::min((uint)1460, std::min(byteIncWnd(), userDataLen - (curPtr - diff)));
             memcpy(destBegin, srcBegin, len);
             
             // finally we are sending
@@ -96,7 +89,7 @@ void Sender::sending() {
             
             // change the sequence number after sending packet out
             uint *tm = (uint*)RUDP::buff;
-            *tm += len;
+            *tm = curPtr;
             curPtr += len;
         } else {
         NoData:
@@ -107,10 +100,14 @@ void Sender::sending() {
             // if yes just send it
             if (RUDP::testAckBit()) {
                 // TODO: send packet out, must send before reset
-                RUDP::setAckBit(false);
+                RUDP::setAckBit(0);
                 
             }
         }
     }
+}
+
+uint Sender::byteIncWnd() {
+    return RUDP::cWnd - (curPtr - RUDP::sendBase);
 }
 
