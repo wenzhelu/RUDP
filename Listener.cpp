@@ -2,7 +2,7 @@
 
 void Listener::recAns()
 {
-	if(!randomdrop(1))
+	if(!randomdrop(0))
 	{
 		
 		int recbits;
