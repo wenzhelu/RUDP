@@ -14,6 +14,7 @@ typedef unsigned int uint;
 #include <cstdlib>
 #include <chrono>
 #include <map>
+#include <math>
 #include "sender.hpp"
 #include "UDPSock.hpp"
 
@@ -53,6 +54,7 @@ public:
     static statusEnum status;   //
     static uint cWnd;           // Congestion Window
     static uint RTT;            // updated by listener
+    static uint TimeOut;
     static map<uint, milliseconds> startTimes;
     static char buff[PACKET_SIZE + HEADER_LEN];     // 1500 - 8(UDP) - 20(IP)
     static Sender sender;
