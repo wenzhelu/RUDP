@@ -106,5 +106,5 @@ void Listener::getTimeout()
 
 bool randomdrop(double n)
 {
-	return (rand()%100)<=(99*n);
+	return (rand()%100)<(100*n);
 }
