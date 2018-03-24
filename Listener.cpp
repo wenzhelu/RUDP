@@ -10,9 +10,10 @@ void Listener::recAns()
 		char databuf[1460];
 		bool databit=false;
 		bool ackbit=false;
-		getTimeout();
+		recbits=sock.read(rec,1472);
+		getTimeout(*(int*)rec+recbits);
 		if(rec[Listener::control]>>7)
-		databit=true;
+			databit=true;
 		if((rec[Listener::control]>>6)&1)
 			ackbit=true;
 		if(ackbit)
@@ -21,6 +22,7 @@ void Listener::recAns()
 		{	
 			*(int*)(RUDP::buff+4)=*(int*)rec+recbits;
 			RUDP::buff[Listener::control]|=1<<6;
+			strncpy(rec+12,databuf,1460);
 		}
 	}	
 }
@@ -28,7 +30,7 @@ void Listener::update(unsigned int ack)
 {
 	if(RUDP::status==statusEnum::SLOW_START)
 	{
-		if(ack<RUDP::sendBase)
+		if(ack==RUDP::sendBase)
 		{
 			this->duplicateACK+=1;
 			if(this->duplicateACK==3)
@@ -43,7 +45,7 @@ void Listener::update(unsigned int ack)
 	}
 	else if(RUDP::status==statusEnum::FAST_REC)
 	{
-		if(ack<RUDP::sendBase)
+		if(ack==RUDP::sendBase)
 			;
 		else
 		{
@@ -55,7 +57,7 @@ void Listener::update(unsigned int ack)
     	}	
 	else
 	{
-		if(ack<RUDP::sendBase)
+		if(ack==RUDP::sendBase)
 		{
 			this->duplicateACK+=1;
 			if(this->duplicateACK==3)
@@ -91,9 +93,18 @@ void Listener::linear(unsigned int ack)
 	this->ACKcwnd=0;
 	RUDP::sendBase=ack;
 }
-void Listener::getTimeout()
+void Listener::getTimeout(int ack)
 {
-	ms end;
+	ms end=std::chrono::milliseconds::now();
+	ms start;
+	if(RUDP::stratTimes.find(ack)==RUDP::startTimes.end())
+		printf("ack error\n");
+	else
+	{
+		start=RUDP::startTimes.at(ack);
+		RUDP::startTimes.erase(RUDP::startTimes.begin(),start+1);
+	}
+	this->sRTT=end-start;
 	int u,phi,delta;
 	u=1;
 	phi=4;
