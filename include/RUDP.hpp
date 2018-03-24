@@ -44,7 +44,7 @@ private:
     RUDP() {}
     
 public:
-    static const short PACKET_SIZE = 1460;  // max packet size in byte
+    static const short PACKET_SIZE = 1460;  // max packet size in byte - only data here
     static const short HEADER_LEN = 12;     // packet header length
     
     static uint sendBase;       // send base
@@ -54,7 +54,7 @@ public:
     static uint cWnd;           // Congestion Window
     static uint RTT;            // updated by listener
     static map<uint, milliseconds> startTimes;
-    static char buff[1472];     // 1500 - 8(UDP) - 20(IP)
+    static char buff[PACKET_SIZE + HEADER_LEN];     // 1500 - 8(UDP) - 20(IP)
     static Sender sender;
     static bool close;
     static Usock sock;
@@ -93,6 +93,8 @@ public:
         cWnd = PACKET_SIZE;
         close = false;
         sock.init(port, remoteIp, remotePort);
+        // TODO: spawn threads to run listener and sender
+        
 //        milliseconds ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     }
     
