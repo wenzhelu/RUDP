@@ -17,7 +17,8 @@ public:
 	void fastRecovery();
 	void index(unsigned int sendbase);
 	void linear(unsigned int sendbase);
-	void getTimeout();	
+	void getTimeout();
+	bool randomdrop(double probility);
 };
 
 #endif
