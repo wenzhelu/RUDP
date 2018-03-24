@@ -38,6 +38,8 @@ typedef enum status {
     CONG_AVOID,
 } statusEnum;
 
+typedef std::chrono::milliseconds ms;
+
 // class for the protocol
 class RUDP {
     
