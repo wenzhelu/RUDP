@@ -11,7 +11,8 @@ typedef unsigned int uint;
 #include <cstdlib>
 #include <chrono>
 #include <map>
-#include <math>
+#include <cmath>
+#include <thread>
 #include "sender.hpp"
 #include "UDPSock.hpp"
 
@@ -37,6 +38,8 @@ typedef enum status {
 
 typedef std::chrono::milliseconds ms;
 
+#include "Listener.hpp"
+
 // class for the protocol
 class RUDP {
     
@@ -57,8 +60,11 @@ public:
     static map<uint, milliseconds> startTimes;
     static char buff[PACKET_SIZE + HEADER_LEN];     // 1500 - 8(UDP) - 20(IP)
     static Sender sender;
+    static Listener listener;
     static bool close;
     static Usock sock;
+    static thread *th_listener;
+    static thread *th_sender;
 //    static uint timeout;      // we decide to let timer to set RTT
     
     static void setDataBit(bool tf){
@@ -94,7 +100,12 @@ public:
         cWnd = PACKET_SIZE;
         close = false;
         sock.init(port, remoteIp, remotePort);
+        
+        
+        
         // TODO: spawn threads to run listener and sender
+        th_sender = new thread(&Sender::sending, std::ref(sender));
+//        th_listener = new thread(
         
 //        milliseconds ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     }
