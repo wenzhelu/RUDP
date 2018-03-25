@@ -20,18 +20,19 @@ private:
 public:
     Timer(microseconds ms) {
         this->ms = ms;
-        thread([this]{
-            start();
-        });
     }
     
-    void start() {
+    void count() {
         std::this_thread::sleep_for(ms);
         run();
     }
     
+    void start() {
+        thread t(&Timer::count, this);
+    }
+    
     virtual void run() {
-        std::cout << "running base class" << std::endl;
+        std::cout << "running base class is not allowed, do nothing" << std::endl;
     }
 };
 

@@ -46,8 +46,8 @@ void RUDP::init(uint window, const char *port, const char *remoteIp, const char 
     
     
     // TODO: spawn threads to run listener and sender
-    th_sender = new thread(&Sender::sending, std::ref(*sender));
-//            th_listener = new thread(
+    th_sender = new thread(&Sender::sending);
+    th_listener = new thread(&Listener::recAns);
     
     //        milliseconds ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 }

@@ -25,9 +25,9 @@ public:
     Sender(RUDP*);
     
     // notice that if the sender is busy, the caller is stuck
-    void send(char*);
+    void send(const char*);
     
-    void send(char*, size_t);
+    void send(const char*, size_t);
     
     void sending();
     

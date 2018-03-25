@@ -3,11 +3,10 @@
 //  ReliableUDP
 //
 
-
 #include "include/RUDP.hpp"
 #include "include/sender.hpp"
 #include "include/UDPSock.hpp"
-#include "include/TimeoutTimer.hpp"
+//#include "include/TimeoutTimer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -19,30 +18,30 @@
 Sender::Sender(RUDP *r) : userBuff(nullptr), userDataLen(0), resend(false), pending(false), diff(0), master(r) {}
 
 // note that we only support sending file with length in unsigned int range
-void Sender::send(char *file) {
+void Sender::send(const char *file) {
     busy.lock();
     std::fstream fs(file);
     struct stat st;
     stat(file, &st);
     userBuff = new char[st.st_size];
     size_t pt = 0;
-    
+
     while (fs.good()) {
         fs.read(userBuff + pt, 4096);
         pt += fs.gcount();
     }
-    
+
     if (!fs.eof())
         std::cout << "read file error" << std::endl;
-    
+
     userDataLen = st.st_size;
     pending = true;
     diff = master->sendBase;
     curPtr = master->sendBase;
-    fs.close();
+//    fs.close();
 }
 
-void Sender::send(char *buffer, size_t len) {
+void Sender::send(const char *buffer, size_t len) {
     busy.lock();
     userBuff = new char[len];
     memcpy(userBuff, buffer, len);
@@ -99,10 +98,10 @@ void Sender::sending() {
                 
                 // when timer times up, we need to know whether we have
                 // also, we need this to calculate the RTT
-                master->startTimes.emplace(curPtr + len, system_clock::now());
+                master->startTimes.insert(pair<uint, tp>(curPtr + len, system_clock::now()));
                 
                 // set up timer
-                TimeoutTimer(milliseconds(master->TimeOut), this, curPtr);
+//                TimeoutTimer(milliseconds(master->TimeOut), this, curPtr);
                 
                 // change the sequence number after sending packet out
                 curPtr += len;
@@ -118,7 +117,6 @@ void Sender::sending() {
             if (master->testAckBit()) {
                 master->sock->write(master->buff, master->HEADER_LEN);
                 master->setAckBit(0);
-                
             }
         }
     }

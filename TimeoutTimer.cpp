@@ -3,8 +3,8 @@
 //  ReliableUDP
 //
 
-#include "RUDP.hpp"
-#include "TimeoutTimer.hpp"
+#include "include/RUDP.hpp"
+#include "include/TimeoutTimer.hpp"
 
 TimeoutTimer::TimeoutTimer(milliseconds timeout_ms, Sender *s, uint start) : Timer(timeout_ms), sender(s), startByte(start) {}
 
@@ -19,6 +19,5 @@ void TimeoutTimer::run() {
         
         
         sender->resend = true;
-
     }
 }
