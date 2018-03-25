@@ -26,7 +26,6 @@ void Listener::recAns()
 			master->sock->printPacket(true,rec,(uint)recbits);
 		//	printf("%d bytes received\n",recbits);
 		//	printf("sequence num: %u \n",*(uint*)rec);
-			getTimeout(*(uint*)rec+recbits);
 			if(rec[Listener::control]>>7)
 				databit=true;
 			if((rec[Listener::control]>>6)&1)
@@ -34,6 +33,7 @@ void Listener::recAns()
 			if(ackbit)
 			{	
 		//		printf("ack exist\n");
+				getTimeout(*(uint*)rec+recbits);
 				this->update(*(uint*)(rec+4));
 			}
 			if(databit)
