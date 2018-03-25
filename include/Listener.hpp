@@ -1,8 +1,6 @@
 #ifndef Listener_hpp
 #define Listener_hpp
 
-#include "RUDP.hpp"
-
 class Listener{
 public:
 	int duplicateACK;

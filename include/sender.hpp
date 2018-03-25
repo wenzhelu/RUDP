@@ -6,7 +6,6 @@
 #ifndef sender_hpp
 #define sender_hpp
 
-#include "RUDP.hpp"
 #include <mutex>
 
 // only one sender
