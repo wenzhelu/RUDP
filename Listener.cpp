@@ -12,7 +12,7 @@ void Listener::recAns()
 		char databuf[1460];
 		bool databit=false;
 		bool ackbit=false;
-		recbits=sock.read(rec,1472);
+		recbits=RUDP::sock.read(rec,1472);
 		getTimeout(*(int*)rec+recbits);
 		if(rec[Listener::control]>>7)
 			databit=true;
@@ -24,7 +24,7 @@ void Listener::recAns()
 		{	
 			*(int*)(RUDP::buff+4)=*(int*)rec+recbits;
 			RUDP::buff[Listener::control]|=1<<6;
-			strncpy(rec+12,databuf,1460);
+			strncpy(databuf,rec+12,1460);
 		}
 	}	
 }
@@ -97,16 +97,16 @@ void Listener::linear(unsigned int ack)
 }
 void Listener::getTimeout(int ack)
 {
-	ms end=std::chrono::milliseconds::now();
-	ms start;
-	if(RUDP::stratTimes.find(ack)==RUDP::startTimes.end())
+	tp end=std::chrono::system_clock::now();
+	tp start;
+	if(RUDP::startTimes.find(ack)==RUDP::startTimes.end())
 		printf("ack error\n");
 	else
 	{
 		start=RUDP::startTimes.at(ack);
-		RUDP::startTimes.erase(RUDP::startTimes.begin(),start+1);
+		RUDP::startTimes.erase(RUDP::startTimes.begin(),++RUDP::startTimes.find(ack));
 	}
-	this->sRTT=end-start;
+	this->sRTT=std::chrono::milliseconds((end-start).count());
 	int u,phi,delta;
 	u=1;
 	phi=4;

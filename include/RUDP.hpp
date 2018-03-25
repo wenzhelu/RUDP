@@ -13,6 +13,8 @@ typedef unsigned int uint;
 #include <map>
 #include <cmath>
 #include <thread>
+#include <string>
+#include <stdio.h>
 #include "sender.hpp"
 #include "UDPSock.hpp"
 
@@ -37,7 +39,7 @@ typedef enum status {
 } statusEnum;
 
 typedef std::chrono::milliseconds ms;
-
+typedef std::chrono::system_clock::time_point tp;	
 #include "Listener.hpp"
 
 // class for the protocol
@@ -57,7 +59,7 @@ public:
     static uint cWnd;           // Congestion Window
     static uint RTT;            // updated by listener
     static uint TimeOut;
-    static map<uint, milliseconds> startTimes;
+    static map<uint, tp> startTimes;
     static char buff[PACKET_SIZE + HEADER_LEN];     // 1500 - 8(UDP) - 20(IP)
     static Sender sender;
     static Listener listener;
