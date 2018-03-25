@@ -15,6 +15,7 @@ typedef unsigned int uint;
 #include <thread>
 #include <string>
 #include <cstdio>
+#include <cstring>
 
 #ifdef DEBUG
 #define DEBUG_FLAG 1

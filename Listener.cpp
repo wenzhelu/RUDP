@@ -84,7 +84,7 @@ void Listener::index(unsigned int ack)
 {
 	master->cWnd+=(ack-master->sendBase);
 	if(master->cWnd>master->winSize)
-		master->cWnd==master->winSize;
+		master->cWnd=master->winSize;
 	master->sendBase=ack;
 }
 void Listener::linear(unsigned int ack)
