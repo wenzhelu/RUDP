@@ -12,7 +12,9 @@
 int main(int argc, const char **argv) {
     RUDP protocol;
     if (DEBUG_FLAG) {
-        protocol.init(30000, "7777", "127.0.0.1", "7777");
+        protocol.init(30000, "6666", "127.0.0.1", "7777");
+        string s = "aaaaaaa";
+        protocol.sender->send(s.data(), 7);
         while(1);
         return 1;
     }
@@ -25,8 +27,8 @@ int main(int argc, const char **argv) {
     
     // until now the protocol have nothing to do,
     // we have to make it send something
-    string s = "aaaaaaa";
-    protocol.sender->send(s.data(), 7);
+//    string s = "aaaaaaa";
+//    protocol.sender->send(s.data(), 7);
     while (1);
     
 //    protocol.shutdown();

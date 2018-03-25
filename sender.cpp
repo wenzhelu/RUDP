@@ -93,6 +93,7 @@ void Sender::sending() {
                 // finally we are sending
                 master->sock->printPacket(false, master->buff, master->HEADER_LEN + len);
                 master->sock->write(master->buff, master->HEADER_LEN + len);
+                master->setAckBit(0);   // set ack 0
                 // if we have any sending error, the usock class
                 // will print debug infomation, and we just ignore any
                 // sending error here, we let ACK and resend to fix it.
@@ -108,6 +109,7 @@ void Sender::sending() {
                 curPtr += len;
                 uint *tm = (uint*)master->buff;
                 *tm = curPtr;
+                
             }
         } else {
             master->setDataBit(0);

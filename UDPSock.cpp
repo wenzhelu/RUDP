@@ -79,18 +79,20 @@ void Usock::printPacket(bool listen, char* buff, uint bufflen) {
         debug_print("No data\n", nullptr);
     }
     
+    ++tm;
     if (buff[8] & 0x40) {
-        debug_print("Ack number: %u\n", *++tm);
+        debug_print("Ack number: %u\n", *tm);
     } else {
         debug_print("No ACK\n", nullptr);
     }
     
+    ++tm;
     if (buff[8] & 0x80) {
-        debug_print("data section:\n%.*s\n", bufflen - 12, (char *)++tm);
+        debug_print("data section:\n%.*s\n", bufflen - 12, (char *)tm);
     }
     
-    if (listen) debug_print("==============Receiving packet ends==============\n", nullptr);
-    else debug_print("================Sending packet ends=============\n", nullptr);
+    if (listen) debug_print("==============Receiving packet ends==============\n\n", nullptr);
+    else debug_print("================Sending packet ends=============\n\n", nullptr);
 }
 
 Usock::~Usock() {

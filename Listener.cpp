@@ -23,16 +23,15 @@ void Listener::recAns()
 ////            debug_print("%s", rec);
 //            getTimeout(*(int*)rec+recbits);
 //=======
-			master->sock->printPacket(true,rec,(uint)recbits);
 		//	printf("%d bytes received\n",recbits);
 		//	printf("sequence num: %u \n",*(uint*)rec);
-			getTimeout(*(uint*)rec+recbits);
 			if(rec[Listener::control]>>7)
 				databit=true;
 			if((rec[Listener::control]>>6)&1)
 				ackbit=true;
 			if(ackbit)
-			{	
+			{
+                getTimeout(*(uint*)rec+recbits);
 		//		printf("ack exist\n");
 				this->update(*(uint*)(rec+4));
 			}
@@ -44,6 +43,7 @@ void Listener::recAns()
 				strncpy(databuf,rec+12,1460);
 		//		printf("%s\n\n",databuf);
 			}
+            master->sock->printPacket(true,rec,(uint)recbits);
 		}
 	}		
 }
