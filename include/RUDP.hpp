@@ -6,17 +6,10 @@
 #ifndef RUDP_hpp
 #define RUDP_hpp
 
-typedef unsigned int uint;
-
-#include <cstdlib>
-#include <chrono>
-#include <map>
-#include <cmath>
-#include <thread>
-#include <string>
-#include <stdio.h>
-#include "sender.hpp"
+#include "include.hpp"
 #include "UDPSock.hpp"
+#include "sender.hpp"
+#include "Listener.hpp"
 
 #ifdef DEBUG
 #define DEBUG_FLAG 1
@@ -28,19 +21,6 @@ do { if (DEBUG_FLAG) { \
 fprintf(stderr, "[DEBUG] ");\
 fprintf(stderr, fmt, __VA_ARGS__); } \
 } while (0)
-
-using namespace std;
-using namespace chrono;    // for milliseconds
-
-typedef enum status {
-    SLOW_START,
-    FAST_REC,
-    CONG_AVOID,
-} statusEnum;
-
-typedef std::chrono::milliseconds ms;
-typedef std::chrono::system_clock::time_point tp;	
-#include "Listener.hpp"
 
 // class for the protocol
 class RUDP {
