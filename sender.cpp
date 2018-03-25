@@ -88,6 +88,9 @@ void Sender::sending() {
                 RUDP::setDataBit(1);
                 memcpy(destBegin, srcBegin, len);
                 
+                // TODO: mapping <endbyte, begin time> after send
+                // when timer times up, we need to know whether we have 
+                
                 // finally we are sending
                 RUDP::sock.write(RUDP::buff, RUDP::HEADER_LEN + len);
                 // if we have any sending error, the usock class

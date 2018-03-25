@@ -114,10 +114,14 @@ public:
         // stop protocol running
         close = true;
         // TODO: join sender and listener thread
+        th_sender->join();
+        th_listener->join();
     }
     
     static void cleanUp() {
         sock.closeSock();
+        delete th_listener;
+        delete th_sender;
         // release resources like socket and heap memory
     }
 };
