@@ -91,6 +91,7 @@ void Sender::sending() {
                 memcpy(destBegin, srcBegin, len);
                 
                 // finally we are sending
+                master->sock->printPacket(false, master->buff, master->HEADER_LEN + len);
                 master->sock->write(master->buff, master->HEADER_LEN + len);
                 // if we have any sending error, the usock class
                 // will print debug infomation, and we just ignore any
@@ -115,6 +116,7 @@ void Sender::sending() {
             // if no then do nothing
             // if yes just send it
             if (master->testAckBit()) {
+                master->sock->printPacket(false, master->buff, master->HEADER_LEN);
                 master->sock->write(master->buff, master->HEADER_LEN);
                 master->setAckBit(0);
             }

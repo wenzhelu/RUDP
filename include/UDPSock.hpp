@@ -29,6 +29,8 @@ public:
     
     size_t write(char[], size_t);
     
+    void printPacket(bool, char*, uint);
+    
     void closeSock();
     
     ~Usock();

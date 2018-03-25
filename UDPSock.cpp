@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #ifdef DEBUG
 #define DEBUG_FLAG 1
@@ -63,6 +64,33 @@ size_t Usock::write(char *buff, size_t len) {
 
 void Usock::closeSock() {
     close(socket_fd);
+}
+
+void Usock::printPacket(bool listen, char* buff, uint bufflen) {
+    if (!DEBUG_FLAG) return;    // only print these while debugging
+
+    uint *tm = (uint *)buff;
+    
+    if (listen) debug_print("==============Receiving packet==============\n", nullptr);
+    else debug_print("================Sending packet=============\n", nullptr);
+    if (buff[8] & 0x80) {
+        debug_print("Sequence number: %u\n", *tm);
+    } else {
+        debug_print("No data\n", nullptr);
+    }
+    
+    if (buff[8] & 0x40) {
+        debug_print("Ack number: %u\n", *++tm);
+    } else {
+        debug_print("No ACK\n", nullptr);
+    }
+    
+    if (buff[8] & 0x80) {
+        debug_print("data section:\n%.*s\n", bufflen - 12, (char *)++tm);
+    }
+    
+    if (listen) debug_print("==============Receiving packet ends==============\n", nullptr);
+    else debug_print("================Sending packet ends=============\n", nullptr);
 }
 
 Usock::~Usock() {

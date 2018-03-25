@@ -2,6 +2,7 @@
 
 #include "include/RUDP.hpp"
 #include "include/Listener.hpp"
+#include "include/UDPSock.hpp"
 
 void Listener::recAns()
 {
@@ -16,8 +17,9 @@ void Listener::recAns()
 			char databuf[1460];
 			bool databit=false;
 			bool ackbit=false;
-	 		recbits=master->sock.read(rec,1472);
+	 		recbits=master->sock->read(rec,1472);
 			printf("%d bytes received\n",recbits);
+//            debug_print("%s", rec);
 			getTimeout(*(int*)rec+recbits);
 			if(rec[Listener::control]>>7)
 				databit=true;
