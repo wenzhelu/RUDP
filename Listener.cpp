@@ -39,7 +39,7 @@ void Listener::recAns()
 			if(databit)
 			{
 		//		printf("data exist\n");	
-				*(uint*)(master->buff+4)=*(uint*)rec+recbits;
+				*(uint*)(master->buff+4)=*(uint*)rec+recbits-12;
 				master->buff[Listener::control]|=1<<6;
 				strncpy(databuf,rec+12,1460);
 		//		printf("%s\n\n",databuf);

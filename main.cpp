@@ -11,6 +11,7 @@
 // driver code
 int main(int argc, const char **argv) {
     RUDP protocol;
+#ifndef LISTEN
     if (DEBUG_FLAG) {
         protocol.init(30000, "6666", "127.0.0.1", "7777");
         string s = "aaaaaaa";
@@ -18,6 +19,7 @@ int main(int argc, const char **argv) {
         while(1);
         return 1;
     }
+#endif
     
     if (argc != 4) {
         using namespace std;

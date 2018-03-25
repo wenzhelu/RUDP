@@ -109,7 +109,6 @@ void Sender::sending() {
                 curPtr += len;
                 uint *tm = (uint*)master->buff;
                 *tm = curPtr;
-                
             }
         } else {
             master->setDataBit(0);

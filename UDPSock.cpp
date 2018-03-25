@@ -79,14 +79,14 @@ void Usock::printPacket(bool listen, char* buff, uint bufflen) {
         debug_print("No data\n", nullptr);
     }
     
-    ++tm;
+    tm++;
     if (buff[8] & 0x40) {
         debug_print("Ack number: %u\n", *tm);
     } else {
         debug_print("No ACK\n", nullptr);
     }
     
-    ++tm;
+    tm += 2;
     if (buff[8] & 0x80) {
         debug_print("data section:\n%.*s\n", bufflen - 12, (char *)tm);
     }
