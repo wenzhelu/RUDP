@@ -37,6 +37,9 @@ void RUDP::init(uint window, const char *port, const char *remoteIp, const char 
     this->status = SLOW_START;
     this->cWnd = PACKET_SIZE;
     this->close = false;
+    this->RTT = 2000;
+    this->TimeOut = 10000;
+    memset(buff,'0',sizeof(buff));
     
     this->sock = new Usock();
     this->sender = new Sender(this);
