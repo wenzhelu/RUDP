@@ -2,6 +2,7 @@
 
 #include "include/RUDP.hpp"
 #include "include/Listener.hpp"
+#include "include/UDPSock.hpp"
 
 void Listener::recAns()
 {
@@ -16,20 +17,26 @@ void Listener::recAns()
 			char databuf[1460];
 			bool databit=false;
 			bool ackbit=false;
-	 		recbits=master->sock.read(rec,1472);
+	 		recbits=master->sock->read(rec,1472);
 			printf("%d bytes received\n",recbits);
+			printf("sequence num: %d \n",*(int*)rec);
 			getTimeout(*(int*)rec+recbits);
 			if(rec[Listener::control]>>7)
 				databit=true;
 			if((rec[Listener::control]>>6)&1)
 				ackbit=true;
 			if(ackbit)
+			{	
+				printf("ack exist\n");
 				this->update(*(int*)(rec+4));
+			}
 			if(databit)
-			{		
+			{
+				printf("data exist\n");	
 				*(int*)(master->buff+4)=*(int*)rec+recbits;
 				master->buff[Listener::control]|=1<<6;
 				strncpy(databuf,rec+12,1460);
+				printf("%s\n\n",databuf);
 			}
 		}
 	}		
