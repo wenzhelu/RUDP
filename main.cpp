@@ -1,7 +1,6 @@
-
-#include "include/RUDP.hpp"
+#include "include/include.hpp"
 
 int main(){
-	RUDP::listener;
+	RUDP::listener.duplicateACK;
 	return 0;
 }
