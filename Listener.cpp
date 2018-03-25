@@ -18,27 +18,37 @@ void Listener::recAns()
 			bool databit=false;
 			bool ackbit=false;
 	 		recbits=master->sock->read(rec,1472);
-			printf("%d bytes received\n",recbits);
-//            debug_print("%s", rec);
-			getTimeout(*(int*)rec+recbits);
+//<<<<<<< HEAD
+//            printf("%d bytes received\n",recbits);
+////            debug_print("%s", rec);
+//            getTimeout(*(int*)rec+recbits);
+//=======
+			master->sock->printPacket(true,rec,(uint)recbits);
+		//	printf("%d bytes received\n",recbits);
+		//	printf("sequence num: %u \n",*(uint*)rec);
+			getTimeout(*(uint*)rec+recbits);
 			if(rec[Listener::control]>>7)
 				databit=true;
 			if((rec[Listener::control]>>6)&1)
 				ackbit=true;
 			if(ackbit)
-				this->update(*(int*)(rec+4));
+			{	
+		//		printf("ack exist\n");
+				this->update(*(uint*)(rec+4));
+			}
 			if(databit)
-			{		
-				*(int*)(master->buff+4)=*(int*)rec+recbits;
+			{
+		//		printf("data exist\n");	
+				*(uint*)(master->buff+4)=*(uint*)rec+recbits;
 				master->buff[Listener::control]|=1<<6;
 				strncpy(databuf,rec+12,1460);
+		//		printf("%s\n\n",databuf);
 			}
 		}
 	}		
 }
 void Listener::update(unsigned int ack)
 {
-	printf("now ack is: %d\n",ack);
 	if(master->status==statusEnum::SLOW_START)
 	{
 		if(ack==master->sendBase)
