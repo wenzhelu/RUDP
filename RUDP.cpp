@@ -12,17 +12,13 @@
 #include "include/sender.hpp"
 
 void RUDP::setDataBit(bool tf){
-    if(tf)
-        buff[8] |= 1 << 7;
-    else
-        buff[8] &= ~(1 << 7);
+    if(tf) buff[8] |= 1 << 7;
+    else buff[8] &= ~(1 << 7);
 }
 
 void RUDP::setAckBit(bool tf){
-    if(tf)
-        buff[8] |= 1 << 6;
-    else
-        buff[8] &= ~(1 << 6);
+    if(tf) buff[8] |= 1 << 6;
+    else buff[8] &= ~(1 << 6);
 }
 
 bool RUDP::testDataBit() {
@@ -67,8 +63,10 @@ void RUDP::shutdown() {
 }
 
 void RUDP::cleanUp() {
+    // release resources like socket and heap memory
     sock->closeSock();
+    delete sender;
+    delete listener;
     delete th_listener;
     delete th_sender;
-    // release resources like socket and heap memory
 }

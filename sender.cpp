@@ -7,6 +7,7 @@
 #include "include/RUDP.hpp"
 #include "include/sender.hpp"
 #include "include/UDPSock.hpp"
+#include "include/TimeoutTimer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -90,16 +91,18 @@ void Sender::sending() {
                 master->setDataBit(1);
                 memcpy(destBegin, srcBegin, len);
                 
-                // TODO: mapping <endbyte, begin time> after send
-                // when timer times up, we need to know whether we have
-                
-                
-                
                 // finally we are sending
                 master->sock->write(master->buff, master->HEADER_LEN + len);
                 // if we have any sending error, the usock class
                 // will print debug infomation, and we just ignore any
                 // sending error here, we let ACK and resend to fix it.
+                
+                // when timer times up, we need to know whether we have
+                // also, we need this to calculate the RTT
+                master->startTimes.emplace(curPtr + len, system_clock::now());
+                
+                // set up timer
+                TimeoutTimer(milliseconds(master->TimeOut), this, curPtr);
                 
                 // change the sequence number after sending packet out
                 curPtr += len;
