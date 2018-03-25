@@ -5,30 +5,34 @@
 
 void Listener::recAns()
 {
-	if(!randomdrop(0.0))
+	printf("recAns is invoked\n");
+	while(1)
 	{
+		if(!randomdrop(0.0))
+		{
 		
-		int recbits;
-		char rec[1472];
-		char databuf[1460];
-		bool databit=false;
-		bool ackbit=false;
-	 	recbits=master->sock.read(rec,1472);
-		printf("%d bytes received\n",recbits);
-		getTimeout(*(int*)rec+recbits);
-		if(rec[Listener::control]>>7)
-			databit=true;
-		if((rec[Listener::control]>>6)&1)
-			ackbit=true;
-		if(ackbit)
-			this->update(*(int*)(rec+4));
-		if(databit)
-		{	
-			*(int*)(master->buff+4)=*(int*)rec+recbits;
-			master->buff[Listener::control]|=1<<6;
-			strncpy(databuf,rec+12,1460);
+			int recbits;
+			char rec[1472];
+			char databuf[1460];
+			bool databit=false;
+			bool ackbit=false;
+	 		recbits=master->sock.read(rec,1472);
+			printf("%d bytes received\n",recbits);
+			getTimeout(*(int*)rec+recbits);
+			if(rec[Listener::control]>>7)
+				databit=true;
+			if((rec[Listener::control]>>6)&1)
+				ackbit=true;
+			if(ackbit)
+				this->update(*(int*)(rec+4));
+			if(databit)
+			{		
+				*(int*)(master->buff+4)=*(int*)rec+recbits;
+				master->buff[Listener::control]|=1<<6;
+				strncpy(databuf,rec+12,1460);
+			}
 		}
-	}	
+	}		
 }
 void Listener::update(unsigned int ack)
 {
