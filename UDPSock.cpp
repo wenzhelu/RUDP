@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+//#include <errno.h>
 
 #ifdef DEBUG
 #define DEBUG_FLAG 1
@@ -45,6 +46,7 @@ int Usock::init(const char *localPort, const char *remoteIp, const char *remoteP
     }
     
     remote.sin_addr.s_addr = inet_addr(remoteIp);
+    remote.sin_family = AF_INET;
     remote.sin_port = htons(atoi(remotePort));
     
     return 0;
@@ -56,6 +58,7 @@ size_t Usock::read(char *buff, size_t len) {
 
 size_t Usock::write(char *buff, size_t len) {
     size_t written = sendto(socket_fd, buff, len, 0, (struct sockaddr *)&remote, sizeof(remote));
+//    printf("%d\n", errno);
     if (written != len) {
         debug_print("write socket error\n", NULL);
     }

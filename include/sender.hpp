@@ -7,7 +7,9 @@
 #define sender_hpp
 
 #include "RUDP.hpp"
+#include "TimeoutTimer.hpp"
 #include <mutex>
+#include <list>
 
 // only one sender
 class Sender {
@@ -20,6 +22,8 @@ public:
     uint curPtr;      // real pointer to the databuff, notice the difference to the sendbase
     uint diff;        // the difference of sendBase with the dataBuff, for mapping purpose
     RUDP *master;
+    long long packets;
+
     // so that the "real" send base would be RUDP::sendBase - diff
     
     Sender(RUDP*);

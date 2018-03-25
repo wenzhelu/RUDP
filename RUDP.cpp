@@ -38,13 +38,13 @@ void RUDP::init(uint window, const char *port, const char *remoteIp, const char 
     this->status = SLOW_START;
     this->cWnd = PACKET_SIZE;
     this->close = false;
-    this->RTT = 2000;
-    this->TimeOut = 10000;
+    this->RTT = 500;
+    this->TimeOut = 3000;
     
     this->sock = new Usock();
+    this->sock->init(port, remoteIp, remotePort);
     this->sender = new Sender(this);
     this->listener = new Listener(this);
-    this->sock->init(port, remoteIp, remotePort);
     
     
     

@@ -10,14 +10,12 @@ TimeoutTimer::TimeoutTimer(milliseconds timeout_ms, Sender *s, uint start) : Tim
 
 void TimeoutTimer::run() {
     RUDP *master = sender->master;
-    
     if (startByte >= master->sendBase) {
         // if larger or equals, it means this packet times out and we haven't
         // receive its ack
         master->status = SLOW_START;
-        // TODO: symptons of SLOWSTART
-        
-        
+        master->throughput = master->cWnd >> 1;
+        master->cWnd = RUDP::PACKET_SIZE;
         sender->resend = true;
     }
 }

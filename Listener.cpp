@@ -18,6 +18,7 @@ void Listener::recAns()
 			bool databit=false;
 			bool ackbit=false;
 	 		recbits=master->sock->read(rec,1472);
+            uint a= *(uint*)rec;
 //<<<<<<< HEAD
 //            printf("%d bytes received\n",recbits);
 ////            debug_print("%s", rec);
@@ -31,9 +32,8 @@ void Listener::recAns()
 				ackbit=true;
 			if(ackbit)
 			{
-                getTimeout(*(uint*)rec+recbits);
 		//		printf("ack exist\n");
-				getTimeout(*(uint*)rec+recbits);
+				getTimeout(*(uint*)(rec+4));
 				this->update(*(uint*)(rec+4));
 			}
 			if(databit)
@@ -126,15 +126,17 @@ void Listener::getTimeout(int ack)
 		start=master->startTimes.at(ack);
 		master->startTimes.erase(master->startTimes.begin(),++master->startTimes.find(ack));
 	}
-	this->sRTT=std::chrono::milliseconds((end-start).count());
+    
+
+    this->sRTT=std::chrono::milliseconds((end-start).count()/1000000);
 	int u,phi,delta;
 	u=1;
 	phi=4;
 	delta=2;
 	this->eRTT=this->eRTT+std::chrono::milliseconds((this->sRTT.count()-this->eRTT.count())/delta);
 	this->deviation=this->deviation+std::chrono::milliseconds(abs(this->sRTT.count()-this->eRTT.count())/delta-this->deviation.count());
-	master->TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
-	master->RTT=this->eRTT.count();
+//    master->TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
+//    master->RTT=this->eRTT.count();
 }
 
 bool Listener::randomdrop(double n)

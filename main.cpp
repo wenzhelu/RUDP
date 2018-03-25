@@ -11,15 +11,15 @@
 // driver code
 int main(int argc, const char **argv) {
     RUDP protocol;
-#ifndef LISTEN
+//#ifndef LISTEN
     if (DEBUG_FLAG) {
-        protocol.init(30000, "6666", "127.0.0.1", "7777");
+        protocol.init(30000, "7777", "127.0.0.1", "6666");
         string s = "aaaaaaa";
         protocol.sender->send(s.data(), 7);
         while(1);
         return 1;
     }
-#endif
+//#endif
     
     if (argc != 4) {
         using namespace std;
