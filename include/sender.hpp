@@ -6,6 +6,7 @@
 #ifndef sender_hpp
 #define sender_hpp
 
+#include "RUDP.hpp"
 #include <mutex>
 
 // only one sender
@@ -18,9 +19,10 @@ public:
     bool resend;
     uint curPtr;      // real pointer to the databuff, notice the difference to the sendbase
     uint diff;        // the difference of sendBase with the dataBuff, for mapping purpose
+    RUDP *master;
     // so that the "real" send base would be RUDP::sendBase - diff
     
-    Sender();
+    Sender(RUDP*);
     
     // notice that if the sender is busy, the caller is stuck
     void send(char*);

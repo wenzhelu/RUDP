@@ -1,6 +1,12 @@
+//
+// main.cpp
+// Reliable UDP
+//
+
 #include "include/RUDP.hpp"
 
-int main(){
-	RUDP::listener;
+int main() {
+	
 	return 0;
+
 }

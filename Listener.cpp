@@ -1,10 +1,11 @@
 // Listener.cpp
 
+#include "include/RUDP.hpp"
 #include "include/Listener.hpp"
 
 void Listener::recAns()
 {
-	if(!randomdrop(0))
+	if(!randomdrop(0.0))
 	{
 		
 		int recbits;
@@ -12,7 +13,7 @@ void Listener::recAns()
 		char databuf[1460];
 		bool databit=false;
 		bool ackbit=false;
-		recbits=RUDP::sock.read(rec,1472);
+//        recbits=master->sock.read(rec,1472);
 		getTimeout(*(int*)rec+recbits);
 		if(rec[Listener::control]>>7)
 			databit=true;
@@ -22,17 +23,17 @@ void Listener::recAns()
 			this->update(*(int*)(rec+4));
 		if(databit)
 		{	
-			*(int*)(RUDP::buff+4)=*(int*)rec+recbits;
-			RUDP::buff[Listener::control]|=1<<6;
+			*(int*)(master->buff+4)=*(int*)rec+recbits;
+			master->buff[Listener::control]|=1<<6;
 			strncpy(databuf,rec+12,1460);
 		}
 	}	
 }
 void Listener::update(unsigned int ack)
 {
-	if(RUDP::status==statusEnum::SLOW_START)
+	if(master->status==statusEnum::SLOW_START)
 	{
-		if(ack==RUDP::sendBase)
+		if(ack==master->sendBase)
 		{
 			this->duplicateACK+=1;
 			if(this->duplicateACK==3)
@@ -41,25 +42,25 @@ void Listener::update(unsigned int ack)
 		else
 		{
 			this->index(ack);
-			if(RUDP::cWnd>=RUDP::throughput)
-				RUDP::status=statusEnum::CONG_AVOID;
+			if(master->cWnd>=master->throughput)
+				master->status=statusEnum::CONG_AVOID;
 		}
 	}
-	else if(RUDP::status==statusEnum::FAST_REC)
+	else if(master->status==statusEnum::FAST_REC)
 	{
-		if(ack==RUDP::sendBase)
+		if(ack==master->sendBase)
 			;
 		else
 		{
 			
-			RUDP::status=statusEnum::CONG_AVOID;
+			master->status=statusEnum::CONG_AVOID;
 			this->linear(ack);
 		}
 		
     	}	
 	else
 	{
-		if(ack==RUDP::sendBase)
+		if(ack==master->sendBase)
 		{
 			this->duplicateACK+=1;
 			if(this->duplicateACK==3)
@@ -75,36 +76,36 @@ void Listener::update(unsigned int ack)
 void Listener::fastRecovery()
 {
 	this->duplicateACK=0;
-	RUDP::throughput=RUDP::cWnd/2;
-	RUDP::cWnd=RUDP::throughput;
-	RUDP::status=statusEnum::FAST_REC;
+	master->throughput=master->cWnd/2;
+	master->cWnd=master->throughput;
+	master->status=statusEnum::FAST_REC;
 }
 void Listener::index(unsigned int ack)
 {
-	RUDP::cWnd+=(ack-RUDP::sendBase);
-	if(RUDP::cWnd>RUDP::winSize)
-		RUDP::cWnd==RUDP::winSize;
-	RUDP::sendBase=ack;
+	master->cWnd+=(ack-master->sendBase);
+	if(master->cWnd>master->winSize)
+		master->cWnd==master->winSize;
+	master->sendBase=ack;
 }
 void Listener::linear(unsigned int ack)
 {
-	this->ACKcwnd+=(ack-RUDP::sendBase);
-	RUDP::cWnd+=(ACKcwnd*RUDP::PACKET_SIZE)/RUDP::cWnd;
-	if(RUDP::cWnd>RUDP::winSize)
-		RUDP::cWnd=RUDP::winSize;
+	this->ACKcwnd+=(ack-master->sendBase);
+	master->cWnd+=(ACKcwnd*master->PACKET_SIZE)/master->cWnd;
+	if(master->cWnd>master->winSize)
+		master->cWnd=master->winSize;
 	this->ACKcwnd=0;
-	RUDP::sendBase=ack;
+	master->sendBase=ack;
 }
 void Listener::getTimeout(int ack)
 {
 	tp end=std::chrono::system_clock::now();
 	tp start;
-	if(RUDP::startTimes.find(ack)==RUDP::startTimes.end())
+	if(master->startTimes.find(ack)==master->startTimes.end())
 		printf("ack error\n");
 	else
 	{
-		start=RUDP::startTimes.at(ack);
-		RUDP::startTimes.erase(RUDP::startTimes.begin(),++RUDP::startTimes.find(ack));
+		start=master->startTimes.at(ack);
+		master->startTimes.erase(master->startTimes.begin(),++master->startTimes.find(ack));
 	}
 	this->sRTT=std::chrono::milliseconds((end-start).count());
 	int u,phi,delta;
@@ -113,11 +114,11 @@ void Listener::getTimeout(int ack)
 	delta=2;
 	this->eRTT=this->eRTT+std::chrono::milliseconds((this->sRTT.count()-this->eRTT.count())/delta);
 	this->deviation=this->deviation+std::chrono::milliseconds(abs(this->sRTT.count()-this->eRTT.count())/delta-this->deviation.count());
-	RUDP::TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
-	RUDP::RTT=this->eRTT.count();
+	master->TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
+	master->RTT=this->eRTT.count();
 }
 
-bool randomdrop(double n)
+bool Listener::randomdrop(double n)
 {
 	return (rand()%100)<(100*n);
 }

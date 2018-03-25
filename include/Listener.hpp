@@ -1,6 +1,8 @@
 #ifndef Listener_hpp
 #define Listener_hpp
 
+#include "RUDP.hpp"
+
 class Listener{
 public:
 	int duplicateACK;
@@ -8,9 +10,10 @@ public:
 	ms eRTT;
 	ms sRTT;
 	ms deviation;
+    RUDP *master;
 	static const int control=8;
 
-	Listener(){duplicateACK=ACKcwnd=0;};
+    Listener(RUDP *m){duplicateACK=ACKcwnd=0; master = m;};
 	void recAns();
 	void update(unsigned int sendbase);
 	void fastRecovery();
