@@ -33,6 +33,7 @@ void Listener::recAns()
 			{
                 getTimeout(*(uint*)rec+recbits);
 		//		printf("ack exist\n");
+				getTimeout(*(uint*)rec+recbits);
 				this->update(*(uint*)(rec+4));
 			}
 			if(databit)
