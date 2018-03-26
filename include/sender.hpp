@@ -15,13 +15,15 @@ class Sender {
 private:
     void timing();
     
-    void updateTimer();
-    
     void endTask();
     
     // short cut
     // calculate how many bytes left in the congestion window to send.
     uint byteIncWnd();
+    
+    // get two time points difference in milliseconds
+    // the first parameter is begin, the second one is end
+    uint getDurMs(const tp&, const tp&);
     
 public:
     char *userBuff;
@@ -35,12 +37,7 @@ public:
 
     thread *th_timer;
     uint timerBase;     // the send base when the timer is set
-    bool timerSet;      // timer set flag
-    ms sendTime;        // the time when the timer is set
-    
-    //    long long packets;
-    //    Timer *t;
-    //    bool timerDone;
+    tp sendTime;        // the time when the timer is set
     
     Sender(RUDP*);
     

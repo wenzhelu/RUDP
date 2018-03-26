@@ -6,7 +6,7 @@
 #include "include/RUDP.hpp"
 #include "include/sender.hpp"
 #include "include/UDPSock.hpp"
-#include "include/TimeoutTimer.hpp"
+//#include "include/TimeoutTimer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -15,7 +15,7 @@
 #include <thread>
 #include <chrono>   // for timing
 
-Sender::Sender(RUDP *r) : userBuff(nullptr), userDataLen(0), resend(false), pending(false), diff(0), master(r), timerBase(-1), timerSet(false) {}
+Sender::Sender(RUDP *r) : userBuff(nullptr), userDataLen(0), resend(false), pending(false), diff(0), master(r), timerBase(0){}
 
 void Sender::endTask() {
     // all buffer received
@@ -33,20 +33,15 @@ void Sender::endTask() {
     printf("send one file end\n");
 }
 
-void Sender::updateTimer() {
-    if (!timerSet) {
-        
-        // TODO: set up sendTime
-        //        sendTime = system_clock::now();
-        timerBase = master->sendBase;
-        timerSet = true;
-    }
+uint Sender::getDurMs(const tp& begin, const tp& end) {
+    return (end - begin).count() / 6;
 }
 
 void Sender::timing() {
     // timer loop in this function
     while (pending) {
-        if (true) { // TODO: calculate timing
+        tp cur = system_clock::now();
+        if (getDurMs(sendTime, cur) >= master->TimeOut) {
             // time to check sendBase
             // aggressive mode:
             // set up a begin send time before sending the file
@@ -66,7 +61,7 @@ void Sender::timing() {
                 resend = true;
             } else {
                 timerBase = master->sendBase;
-                // TODO: set sendTime here
+                sendTime = cur;
             }
         }
         this_thread::sleep_for(milliseconds(master->TimeOut)); // experimental sleep time
@@ -94,6 +89,8 @@ void Sender::send(const char *file) {
     pending = true;
     diff = master->sendBase;
     curPtr = master->sendBase;
+    timerBase = master->sendBase;
+    sendTime = system_clock::now();
     th_timer = new thread(&Sender::timing, this);
     fs.close();
 }
@@ -153,7 +150,7 @@ void Sender::sending() {
 //                    t = new TimeoutTimer(ms(master->TimeOut), this, curPtr);
                 
 //                }
-                updateTimer();
+//                updateTimer();
                 master->setAckBit(0);   // set ack 0
                 // if we have any sending error, the usock class
                 // will print debug infomation, and we just ignore any
