@@ -35,8 +35,9 @@ public:
     
     ~Timer() {
         delete t;
-        delete this;
-        printf("[DEBUG] Timer susscessful freed\n");
+#ifdef DEBUG
+        fprintf(stderr, "[DEBUG] Timer susscessful freed\n");
+#endif
     }
 };
 

@@ -15,7 +15,63 @@
 #include <thread>
 #include <chrono>   // for timing
 
-Sender::Sender(RUDP *r) : userBuff(nullptr), userDataLen(0), resend(false), pending(false), diff(0), master(r), packets(0), t(nullptr) {}
+Sender::Sender(RUDP *r) : userBuff(nullptr), userDataLen(0), resend(false), pending(false), diff(0), master(r), timerBase(-1), timerSet(false) {}
+
+void Sender::endTask() {
+    // all buffer received
+    // no data pending to send
+    // unlock busy
+    pending = false;
+    delete [] userBuff;
+    userBuff = nullptr;
+    userDataLen = 0;
+    diff = 0;
+    master->startTimes.clear();
+    th_timer->join();   // must wait for thread ends before deleting
+    delete th_timer;
+    busy.unlock();
+    printf("send one file end\n");
+}
+
+void Sender::updateTimer() {
+    if (!timerSet) {
+        
+        // TODO: set up sendTime
+        //        sendTime = system_clock::now();
+        timerBase = master->sendBase;
+        timerSet = true;
+    }
+}
+
+void Sender::timing() {
+    // timer loop in this function
+    while (pending) {
+        if (true) { // TODO: calculate timing
+            // time to check sendBase
+            // aggressive mode:
+            // set up a begin send time before sending the file
+            // then every send time later on is set by timer.
+            // we continuously check timerBase and sendBase every RTT
+            // if sendBase larger than sendBase, we have a time out.
+            // Why called aggressive mode? we make timer very active and
+            // not rely on "send" behavior to avoid stuck in sending.
+            if (timerBase >= master->sendBase) {
+                // data loss timeout!
+                // do we need to calculate timeout and RTT??
+                // do I need to do something about the map?
+                master->status = SLOW_START;
+                master->throughput = master->cWnd >> 1;
+                master->cWnd = RUDP::PACKET_SIZE;
+                debug_print("Timeout! Send base: %u, cWnd: %u, throughput: %u\n", master->sendBase, master->cWnd, master->throughput);
+                resend = true;
+            } else {
+                timerBase = master->sendBase;
+                // TODO: set sendTime here
+            }
+        }
+        this_thread::sleep_for(milliseconds(master->TimeOut)); // experimental sleep time
+    }
+}
 
 // note that we only support sending file with length in unsigned int range
 void Sender::send(const char *file) {
@@ -38,6 +94,7 @@ void Sender::send(const char *file) {
     pending = true;
     diff = master->sendBase;
     curPtr = master->sendBase;
+    th_timer = new thread(&Sender::timing, this);
     fs.close();
 }
 
@@ -49,6 +106,7 @@ void Sender::send(const char *buffer, size_t len) {
     pending = true;
     diff = master->sendBase;
     curPtr = master->sendBase;
+    th_timer = new thread(&Sender::timing, this);
 }
 
 // the sending thread will loop in this function
@@ -60,16 +118,7 @@ void Sender::sending() {
         // packet loss happened
         if (pending) {
             if (master->sendBase - diff >= userDataLen) {
-                // all buffer received
-                // no data pending to send
-                // unlock busy
-                pending = false;
-                delete [] userBuff;
-                userBuff = nullptr;
-                userDataLen = 0;
-                diff = 0;
-                busy.unlock();
-                printf("send one file end\n");
+                endTask();
                 continue;
             }
             
@@ -97,10 +146,14 @@ void Sender::sending() {
                 master->sock->printPacket(false, master->buff, master->HEADER_LEN + len);
                 master->startTimes.insert(pair<uint, tp>(curPtr + len, system_clock::now()));
                 master->sock->write(master->buff, master->HEADER_LEN + len);
-                if (t == nullptr) {
-                    // setup timer
-                    t = new TimeoutTimer(ms(master->TimeOut), this, curPtr);
-                }
+                // old solution may memory leak
+//                if (timerDone) {
+//                    // setup timer
+//                    delete t;
+//                    t = new TimeoutTimer(ms(master->TimeOut), this, curPtr);
+                
+//                }
+                updateTimer();
                 master->setAckBit(0);   // set ack 0
                 // if we have any sending error, the usock class
                 // will print debug infomation, and we just ignore any
@@ -108,9 +161,6 @@ void Sender::sending() {
                 
                 // when timer times up, we need to know whether we have
                 // also, we need this to calculate the RTT
-                
-                // set up timer
-//                TimeoutTimer(milliseconds(master->TimeOut), this, curPtr);
                 
                 // change the sequence number after sending packet out
                 curPtr += len;
@@ -127,11 +177,7 @@ void Sender::sending() {
         if (master->testAckBit()) {
             master->sock->printPacket(false, master->buff, master->HEADER_LEN);
             master->sock->write(master->buff, master->HEADER_LEN);
-            if (t == nullptr) {
-                // setup timer
-                t = new TimeoutTimer(ms(master->TimeOut), this, curPtr);
-            }
-            
+            // not timing only ack packets
             master->setAckBit(0);
         }
     }
@@ -140,4 +186,3 @@ void Sender::sending() {
 uint Sender::byteIncWnd() {
     return master->cWnd - (curPtr - master->sendBase);
 }
-

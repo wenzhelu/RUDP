@@ -8,26 +8,39 @@
 
 #include "RUDP.hpp"
 #include <mutex>
-#include <list>
-
-class Timer;
+#include <thread>
 
 // only one sender
 class Sender {
+private:
+    void timing();
+    
+    void updateTimer();
+    
+    void endTask();
+    
+    // short cut
+    // calculate how many bytes left in the congestion window to send.
+    uint byteIncWnd();
+    
 public:
     char *userBuff;
     uint userDataLen;
     std::mutex busy;    // if there are other files in transit, this will lock
     bool pending;       // if their is data pending to send
     bool resend;
-    uint curPtr;      // real pointer to the databuff, notice the difference to the sendbase
-    uint diff;        // the difference of sendBase with the dataBuff, for mapping purpose
+    uint curPtr;        // real pointer to the databuff, notice the difference to the sendbase
+    uint diff;          // the difference of sendBase with the dataBuff, for mapping purpose
     RUDP *master;
-    long long packets;
-    Timer *t;
-    
 
-    // so that the "real" send base would be RUDP::sendBase - diff
+    thread *th_timer;
+    uint timerBase;     // the send base when the timer is set
+    bool timerSet;      // timer set flag
+    ms sendTime;        // the time when the timer is set
+    
+    //    long long packets;
+    //    Timer *t;
+    //    bool timerDone;
     
     Sender(RUDP*);
     
@@ -38,10 +51,6 @@ public:
     
     void sending();
     
-private:
-    // short cut
-    // calculate how many bytes left in the congestion window to send.
-    uint byteIncWnd();
 };
 
 #endif /* sender_hpp */
