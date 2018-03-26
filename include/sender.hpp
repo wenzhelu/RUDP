@@ -15,7 +15,11 @@ class Sender {
 private:
     void timing();
     
+    // the beginTask and endTask function set up
+    // various status of the sender
     void endTask();
+    
+    void beginTask();
     
     // short cut
     // calculate how many bytes left in the congestion window to send.

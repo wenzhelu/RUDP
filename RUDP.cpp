@@ -18,12 +18,21 @@ void RUDP::setAckBit(bool tf){
     else buff[8] &= ~(1 << 6);
 }
 
+void RUDP::setFinBit(bool tf){
+    if(tf) buff[8] |= 1 << 5;
+    else buff[8] &= ~(1 << 5);
+}
+
 bool RUDP::testDataBit() {
     return (buff[8] >> 7) & 1;
 }
 
 bool RUDP::testAckBit() {
     return (buff[8] >> 6) & 1;
+}
+
+bool RUDP::testFinBit() {
+    return (buff[8] >> 5) & 1;
 }
 
 // in charge of setting default parameters and
@@ -49,7 +58,6 @@ void RUDP::init(uint window, const char *port, const char *remoteIp, const char 
     
     th_sender = new thread(&Sender::sending, sender);
     th_listener = new thread(&Listener::recAns, listener);
-    
 }
 
 void RUDP::shutdown() {

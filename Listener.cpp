@@ -8,59 +8,74 @@
 
 void Listener::recAns()
 {
-	printf("recAns is invoked\n");
+    debug_print("recAns is invoked\n", nullptr);
+    string s = "./tm0.pdf";
     fstream fs;
-    fs.open("./tm.pdf", ios::trunc | ios::out);
-	while(1)
-	{
+    
+    while (!master->close) {
         
-        int recbits;
-        char rec[1472];
-//        char databuf[1460];
-        bool databit=false;
-        bool ackbit=false;
-        recbits=master->sock->read(rec,1472);
-
-		//	printf("%d bytes received\n",recbits);
-		//	printf("sequence num: %u \n",*(uint*)rec);
-        if(rec[Listener::control]>>7)
-            databit=true;
-        if((rec[Listener::control]>>6)&1)
-            ackbit=true;
-        if(!randomdrop(0.1) || ackbit)
+        fs.open(s, ios::trunc | ios::out);
+        while(1)
         {
-            if(ackbit)
-            {
-    //		    printf("ack exist\n");
-                getTimeout(*(uint*)(rec+4));
-                this->update(*(uint*)(rec+4));
+            int recbits;
+            char rec[1472];
+            //        char databuf[1460];
+            bool databit=false;
+            bool ackbit=false;
+            recbits=master->sock->read(rec,1472);
+            
+            //    printf("%d bytes received\n",recbits);
+            //    printf("sequence num: %u \n",*(uint*)rec);
+            if(rec[Listener::control]>>7)
+                databit=true;
+            if((rec[Listener::control]>>6)&1)
+                ackbit=true;
+            if (rec[8] & 0x20) {
+                // this is a fin packet we are not dropping
+                s[4]++;
+                fs.close();
+                debug_print("Received new file!\n", nullptr);
+                break;
             }
-            if(databit)
+            
+            if(!randomdrop(0.1) || ackbit)
             {
-    //		    printf("data exist\n");
-                if(this->totalrec!=*(uint*)rec)
+                debug_print("Not dropping this packet\n", nullptr);
+                if(ackbit)
                 {
-                    *(uint*)(master->buff+4) = this->totalrec;
+                    //            printf("ack exist\n");
+                    getTimeout(*(uint*)(rec+4));
+                    this->update(*(uint*)(rec+4));
                 }
-                else
+                if(databit)
                 {
-                    *(uint*)(master->buff+4) = *(uint*)rec+recbits-12;
-                    this->totalrec += (recbits - 12);
-                    char *data = rec + 12;
-                    fs.write(data, recbits - 12);
-                    fs.flush();
-//                    this->totalrec += (recbits-12);
+                    //            printf("data exist\n");
+                    if(this->totalrec!=*(uint*)rec)
+                    {
+                        *(uint*)(master->buff+4) = this->totalrec;
+                    }
+                    else
+                    {
+                        *(uint*)(master->buff+4) = *(uint*)rec+recbits-12;
+                        this->totalrec += (recbits - 12);
+                        char *data = rec + 12;
+                        fs.write(data, recbits - 12);
+                        fs.flush();
+                        //                    this->totalrec += (recbits-12);
+                    }
+                    master->buff[Listener::control]|=1<<6;
+                    //
+                    //                strncpy(databuf,rec+12,1460);
+                    //            printf("%s\n\n",databuf);
                 }
-                master->buff[Listener::control]|=1<<6;
-                //
-//                strncpy(databuf,rec+12,1460);
-    //		    printf("%s\n\n",databuf);
+            } else {
+                debug_print("dropping this packet\n", nullptr);
             }
-		}
-        master->sock->printPacket(true,rec,(uint)recbits);
-	}
-    fs.close();
+            master->sock->printPacket(true,rec,(uint)recbits);
+        }
+    }
 }
+
 void Listener::update(unsigned int ack)
 {
 	if(master->status==statusEnum::SLOW_START)

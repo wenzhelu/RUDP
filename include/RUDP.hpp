@@ -80,9 +80,13 @@ public:
     
     void setAckBit(bool tf);
     
+    void setFinBit(bool tf);
+    
     bool testDataBit();
     
     bool testAckBit();
+    
+    bool testFinBit();
     
     void shutdown();
     

@@ -20,6 +20,15 @@ uint Sender::getDurMs(const tp& begin, const tp& end) {
     return (end - begin).count() / 1000000;
 }
 
+void Sender::beginTask() {
+    diff = master->sendBase;
+    curPtr = master->sendBase;
+    timerBase = master->sendBase;
+    sendTime = system_clock::now();
+    th_timer = new thread(&Sender::timing, this);
+    pending = true;
+}
+
 void Sender::endTask() {
     // all buffer received
     // no data pending to send
@@ -32,15 +41,20 @@ void Sender::endTask() {
     master->startTimes.clear();
     th_timer->join();   // must wait for thread ends before deleting
     delete th_timer;
+    // sending finish signal
+    master->setDataBit(0);
+    master->setFinBit(1);
+    master->sock->write(master->buff, RUDP::PACKET_SIZE);
+    master->setFinBit(0);
     busy.unlock();
-    printf("send one file end\n");
+    debug_print("send one file end\n", nullptr);
 }
 
 void Sender::timing() {
     // timer loop in this function
     while (pending) {
         tp cur = system_clock::now();
-        if (getDurMs(sendTime, cur)) { // TODO: calculate timing
+        if (getDurMs(sendTime, cur) >= master->TimeOut) {
             // time to check sendBase
             // aggressive mode:
             // set up a begin send time before sending the file
@@ -85,12 +99,10 @@ void Sender::send(const char *file) {
         std::cout << "read file error" << std::endl;
 
     userDataLen = st.st_size;
-    pending = true;
-    diff = master->sendBase;
-    curPtr = master->sendBase;
-    timerBase = master->sendBase;
-    th_timer = new thread(&Sender::timing, this);
     fs.close();
+    
+    // after data copying
+    beginTask();
 }
 
 void Sender::send(const char *buffer, size_t len) {
@@ -98,11 +110,9 @@ void Sender::send(const char *buffer, size_t len) {
     userBuff = new char[len];
     memcpy(userBuff, buffer, len);
     userDataLen = len;
-    pending = true;
-    diff = master->sendBase;
-    curPtr = master->sendBase;
-    timerBase = master->sendBase;
-    th_timer = new thread(&Sender::timing, this);
+    
+    // after data copying
+    beginTask();
 }
 
 // the sending thread will loop in this function
