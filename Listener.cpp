@@ -23,7 +23,7 @@ void Listener::recAns()
             bool databit=false;
             bool ackbit=false;
             recbits=master->sock->read(rec,1472);
-            
+            this_thread::sleep_for(ms(50));
             //    printf("%d bytes received\n",recbits);
             //    printf("sequence num: %u \n",*(uint*)rec);
             if(rec[Listener::control]>>7)
@@ -35,10 +35,12 @@ void Listener::recAns()
                 s[4]++;
                 fs.close();
                 debug_print("Received new file!\n", nullptr);
+                debug_print("slow start: %u packets, congestion avoidence: %u packets\n",this->slowNum,this->caNum);
+//                debug_print("RTT time: %u ms\n",this->eRTT);
                 break;
             }
             
-            if(!randomdrop(0.1) || ackbit)
+            if(!randomdrop(0.0) || ackbit)
             {
                 debug_print("Not dropping this packet\n", nullptr);
                 if(ackbit)
@@ -80,6 +82,7 @@ void Listener::update(unsigned int ack)
 {
 	if(master->status==statusEnum::SLOW_START)
 	{
+        this->slowNum++;
 		if(ack==master->sendBase)
 		{
 			this->duplicateACK+=1;
@@ -107,6 +110,7 @@ void Listener::update(unsigned int ack)
     	}	
 	else
 	{
+        this->caNum++;
 		if(ack==master->sendBase)
 		{
 			this->duplicateACK+=1;

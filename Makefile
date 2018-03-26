@@ -6,11 +6,11 @@ compile:
 debug:
 	g++ -o rudp -std=c++11 -DDEBUG -pthread main.cpp Listener.cpp RUDP.cpp sender.cpp UDPSock.cpp 
 
-client:
-	g++ -o rudp -std=c++11 -DDEBUG -ULISTEN -pthread main.cpp Listener.cpp RUDP.cpp sender.cpp UDPSock.cpp 
+#client:
+#	g++ -o rudp -std=c++11 -DDEBUG -ULISTEN -pthread main.cpp Listener.cpp RUDP.cpp sender.cpp UDPSock.cpp 
 
-server:
-	g++ -o rudp -std=c++11 -DDEBUG -pthread main.cpp Listener.cpp RUDP.cpp sender.cpp UDPSock.cpp 
+#server:
+#	g++ -o rudp -std=c++11 -DDEBUG -pthread main.cpp Listener.cpp RUDP.cpp sender.cpp UDPSock.cpp 
 #debug_listener:
 #	g++ -o rudp -std=c++11 -DDEBUG -DLISTEN -pthread main.cpp Listener.cpp RUDP.cpp sender.cpp UDPSock.cpp TimeoutTimer.cpp
 

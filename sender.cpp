@@ -48,6 +48,7 @@ void Sender::endTask() {
     master->setFinBit(0);
     busy.unlock();
     debug_print("send one file end\n", nullptr);
+    debug_print("RTT: %u\n", master->RTT);
 }
 
 void Sender::timing() {
@@ -118,7 +119,7 @@ void Sender::send(const char *buffer, size_t len) {
 // the sending thread will loop in this function
 void Sender::sending() {
     while (!master->close) {
-        this_thread::sleep_for(chrono::milliseconds(master->RTT / 2)); // sleep time need to test
+        this_thread::sleep_for(chrono::milliseconds(master->RTT >> 2)); // sleep time need to test
         // we are making somehow dangerous assumption here.
         // the listener may need to change the curPtr when
         // packet loss happened
