@@ -6,7 +6,7 @@
 #include "include/RUDP.hpp"
 #include "include/sender.hpp"
 #include "include/UDPSock.hpp"
-//#include "include/TimeoutTimer.hpp"
+#include "include/TimeoutTimer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -15,7 +15,7 @@
 #include <thread>
 #include <chrono>   // for timing
 
-Sender::Sender(RUDP *r) : userBuff(nullptr), userDataLen(0), resend(false), pending(false), diff(0), master(r), packets(0) {}
+Sender::Sender(RUDP *r) : userBuff(nullptr), userDataLen(0), resend(false), pending(false), diff(0), master(r), packets(0), t(nullptr) {}
 
 // note that we only support sending file with length in unsigned int range
 void Sender::send(const char *file) {
@@ -38,7 +38,7 @@ void Sender::send(const char *file) {
     pending = true;
     diff = master->sendBase;
     curPtr = master->sendBase;
-//    fs.close();
+    fs.close();
 }
 
 void Sender::send(const char *buffer, size_t len) {
@@ -69,13 +69,16 @@ void Sender::sending() {
                 userDataLen = 0;
                 diff = 0;
                 busy.unlock();
+                printf("send one file end\n");
                 continue;
             }
             
             // data pending to send, copy data to the buff
             if (resend) {
                 // packet loss, request resend by listener
+                debug_print("data loss! sendbase: %u\n", master->sendBase);
                 curPtr = master->sendBase;
+                *((uint*) master->buff) = master->sendBase;
                 resend = false;
             }
             
@@ -94,9 +97,9 @@ void Sender::sending() {
                 master->sock->printPacket(false, master->buff, master->HEADER_LEN + len);
                 master->startTimes.insert(pair<uint, tp>(curPtr + len, system_clock::now()));
                 master->sock->write(master->buff, master->HEADER_LEN + len);
-                if (packets++ % 3 == 0) {
+                if (t == nullptr) {
                     // setup timer
-//                    l.push_back(new TimeoutTimer(ms(master->TimeOut), this, curPtr));
+                    t = new TimeoutTimer(ms(master->TimeOut), this, curPtr);
                 }
                 master->setAckBit(0);   // set ack 0
                 // if we have any sending error, the usock class
@@ -124,9 +127,9 @@ void Sender::sending() {
         if (master->testAckBit()) {
             master->sock->printPacket(false, master->buff, master->HEADER_LEN);
             master->sock->write(master->buff, master->HEADER_LEN);
-            if (packets++ % 3 == 0) {
+            if (t == nullptr) {
                 // setup timer
-//                l.push_back(new TimeoutTimer(ms(master->TimeOut), this, curPtr));
+                t = new TimeoutTimer(ms(master->TimeOut), this, curPtr);
             }
             
             master->setAckBit(0);

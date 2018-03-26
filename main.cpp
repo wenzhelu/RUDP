@@ -11,15 +11,15 @@
 // driver code
 int main(int argc, const char **argv) {
     RUDP protocol;
-//#ifndef LISTEN
     if (DEBUG_FLAG) {
-        protocol.init(30000, "7777", "127.0.0.1", "6666");
-        string s = "aaaaaaa";
-        protocol.sender->send(s.data(), 7);
+        protocol.init(100000000, "7777", "127.0.0.1", "6666");
+//        string s = "aaaaaaa";
+//        protocol.sender->send("/Users/wenzhelu/doc/SP2018/hw2.tar.gz");
+//        protocol.sender->send("/Users/wenzhelu/vimrc_bak");
+        protocol.sender->send("/Users/wenzhelu/doc/manuals/bash.pdf");
         while(1);
         return 1;
     }
-//#endif
     
     if (argc != 4) {
         using namespace std;

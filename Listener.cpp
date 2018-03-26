@@ -3,50 +3,64 @@
 #include "include/RUDP.hpp"
 #include "include/Listener.hpp"
 #include "include/UDPSock.hpp"
+#include "include/sender.hpp"
+//#include <iostream>
+#include <fstream>
 
 void Listener::recAns()
 {
 	printf("recAns is invoked\n");
+    fstream fs;
+    fs.open("./tm.pdf", ios::trunc | ios::out);
 	while(1)
 	{
-		if(!randomdrop(0.0))
-		{
-		
-			int recbits;
-			char rec[1472];
-			char databuf[1460];
-			bool databit=false;
-			bool ackbit=false;
-	 		recbits=master->sock->read(rec,1472);
-            uint a= *(uint*)rec;
-//<<<<<<< HEAD
-//            printf("%d bytes received\n",recbits);
-////            debug_print("%s", rec);
-//            getTimeout(*(int*)rec+recbits);
-//=======
+        
+        int recbits;
+        char rec[1472];
+//        char databuf[1460];
+        bool databit=false;
+        bool ackbit=false;
+        recbits=master->sock->read(rec,1472);
+
 		//	printf("%d bytes received\n",recbits);
 		//	printf("sequence num: %u \n",*(uint*)rec);
-			if(rec[Listener::control]>>7)
-				databit=true;
-			if((rec[Listener::control]>>6)&1)
-				ackbit=true;
-			if(ackbit)
-			{
-		//		printf("ack exist\n");
-				getTimeout(*(uint*)(rec+4));
-				this->update(*(uint*)(rec+4));
-			}
-			if(databit)
-			{
-		//		printf("data exist\n");	
-				*(uint*)(master->buff+4)=*(uint*)rec+recbits-12;
-				master->buff[Listener::control]|=1<<6;
-				strncpy(databuf,rec+12,1460);
-		//		printf("%s\n\n",databuf);
-			}
-            master->sock->printPacket(true,rec,(uint)recbits);
+        if(rec[Listener::control]>>7)
+            databit=true;
+        if((rec[Listener::control]>>6)&1)
+            ackbit=true;
+        if(!randomdrop(0.1) || ackbit)
+        {
+            if(ackbit)
+            {
+    //		    printf("ack exist\n");
+                getTimeout(*(uint*)(rec+4));
+                this->update(*(uint*)(rec+4));
+            }
+            if(databit)
+            {
+    //		    printf("data exist\n");
+                if(this->totalrec!=*(uint*)rec)
+                {
+                    *(uint*)(master->buff+4) = this->totalrec;
+                }
+                else
+                {
+                    *(uint*)(master->buff+4) = *(uint*)rec+recbits-12;
+                    this->totalrec += (recbits - 12);
+//                    this->totalrec += (recbits-12);
+                }
+                master->buff[Listener::control]|=1<<6;
+                //
+                char *data = rec + 12;
+                fs.write(data, recbits - 12);
+                fs.flush();
+//                strncpy(databuf,rec+12,1460);
+    //		    printf("%s\n\n",databuf);
+            }
 		}
-	}		
+        master->sock->printPacket(true,rec,(uint)recbits);
+	}
+    fs.close();
 }
 void Listener::update(unsigned int ack)
 {
@@ -68,7 +82,7 @@ void Listener::update(unsigned int ack)
 	else if(master->status==statusEnum::FAST_REC)
 	{
 		if(ack==master->sendBase)
-			;
+            ;
 		else
 		{
 			
@@ -98,6 +112,7 @@ void Listener::fastRecovery()
 	master->throughput=master->cWnd/2;
 	master->cWnd=master->throughput;
 	master->status=statusEnum::FAST_REC;
+    master->sender->resend = true;
 }
 void Listener::index(unsigned int ack)
 {

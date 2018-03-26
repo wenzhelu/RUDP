@@ -16,10 +16,12 @@ using std::thread;
 class Timer {
 private:
     microseconds ms;
+    thread *t;
     
 public:
     Timer(microseconds ms) {
         this->ms = ms;
+        t = new thread(&Timer::count, this);
     }
     
     void count() {
@@ -27,12 +29,14 @@ public:
         run();
     }
     
-    void start() {
-        thread t(&Timer::count, this);
-    }
-    
     virtual void run() {
         std::cout << "running base class is not allowed, do nothing" << std::endl;
+    }
+    
+    ~Timer() {
+        delete t;
+        delete this;
+        printf("[DEBUG] Timer susscessful freed\n");
     }
 };
 

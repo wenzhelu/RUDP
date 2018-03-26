@@ -17,5 +17,6 @@ void TimeoutTimer::run() {
         master->throughput = master->cWnd >> 1;
         master->cWnd = RUDP::PACKET_SIZE;
         sender->resend = true;
+        sender->t = nullptr;
     }
 }

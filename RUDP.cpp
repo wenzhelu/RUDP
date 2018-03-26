@@ -31,7 +31,7 @@ bool RUDP::testAckBit() {
 void RUDP::init(uint window, const char *port, const char *remoteIp, const char *remotePort) {
     srand(time(nullptr));   // set random seed
     memset(buff, 0, PACKET_SIZE + HEADER_LEN);
-    this->sendBase = rand() % 1000;
+    this->sendBase = 0;
     // make the sequence number in the buffer the same with send base
     *(uint *)(this->buff) = this->sendBase;
     this->winSize = window;
@@ -40,6 +40,7 @@ void RUDP::init(uint window, const char *port, const char *remoteIp, const char 
     this->close = false;
     this->RTT = 500;
     this->TimeOut = 3000;
+    this->throughput = 100000000;
     
     this->sock = new Usock();
     this->sock->init(port, remoteIp, remotePort);

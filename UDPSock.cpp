@@ -58,7 +58,6 @@ size_t Usock::read(char *buff, size_t len) {
 
 size_t Usock::write(char *buff, size_t len) {
     size_t written = sendto(socket_fd, buff, len, 0, (struct sockaddr *)&remote, sizeof(remote));
-//    printf("%d\n", errno);
     if (written != len) {
         debug_print("write socket error\n", NULL);
     }
@@ -81,19 +80,19 @@ void Usock::printPacket(bool listen, char* buff, uint bufflen) {
     } else {
         debug_print("No data\n", nullptr);
     }
-    
+
     tm++;
     if (buff[8] & 0x40) {
         debug_print("Ack number: %u\n", *tm);
     } else {
         debug_print("No ACK\n", nullptr);
     }
-    
-    tm += 2;
-    if (buff[8] & 0x80) {
-        debug_print("data section:\n%.*s\n", bufflen - 12, (char *)tm);
-    }
-    
+
+//    tm += 2;
+//    if (buff[8] & 0x80) {
+//        debug_print("data section:\n%.*s\n", bufflen - 12, (char *)tm);
+//    }
+
     if (listen) debug_print("==============Receiving packet ends==============\n\n", nullptr);
     else debug_print("================Sending packet ends=============\n\n", nullptr);
 }
