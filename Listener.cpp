@@ -46,13 +46,13 @@ void Listener::recAns()
                 {
                     *(uint*)(master->buff+4) = *(uint*)rec+recbits-12;
                     this->totalrec += (recbits - 12);
+                    char *data = rec + 12;
+                    fs.write(data, recbits - 12);
+                    fs.flush();
 //                    this->totalrec += (recbits-12);
                 }
                 master->buff[Listener::control]|=1<<6;
                 //
-                char *data = rec + 12;
-                fs.write(data, recbits - 12);
-                fs.flush();
 //                strncpy(databuf,rec+12,1460);
     //		    printf("%s\n\n",databuf);
             }
