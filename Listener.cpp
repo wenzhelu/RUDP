@@ -81,7 +81,7 @@ void Listener::update(unsigned int ack)
 {
 	if(master->status==statusEnum::SLOW_START)
 	{
-        master->slowStartNum++;
+//        master->slowStartNum++;
 		if(ack==master->sendBase)
 		{
 			this->duplicateACK+=1;
@@ -109,7 +109,7 @@ void Listener::update(unsigned int ack)
     	}	
 	else
 	{
-        master->congestNum++;
+//        master->congestNum++;
 		if(ack==master->sendBase)
 		{
 			this->duplicateACK+=1;

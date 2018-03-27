@@ -151,6 +151,8 @@ void Sender::sending() {
                 master->sock->printPacket(false, master->buff, master->HEADER_LEN + len);
                 master->startTimes.insert(pair<uint, tp>(curPtr + len, system_clock::now()));
                 master->sock->write(master->buff, master->HEADER_LEN + len);
+                if (master->status == SLOW_START) master->slowStartNum++;
+                else if (master->status == CONG_AVOID) master->congestNum++;
 
                 master->setAckBit(0);   // set ack 0
                 // if we have any sending error, the usock class
