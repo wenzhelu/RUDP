@@ -70,14 +70,14 @@ void Sender::timing() {
                 master->status = SLOW_START;
                 master->throughput = master->cWnd >> 1;
                 master->cWnd = RUDP::PACKET_SIZE;
-                debug_print("Timeout! Send base: %u, cWnd: %u, throughput: %u\n", master->sendBase, master->cWnd, master->throughput);
+//                debug_print("Timeout! Send base: %u, cWnd: %u, throughput: %u\n", master->sendBase, master->cWnd, master->throughput);
                 resend = true;
             } else {
                 timerBase = master->sendBase;
                 sendTime = cur;
             }
         }
-        this_thread::sleep_for(milliseconds(master->TimeOut >> 1)); // experimental sleep time
+        this_thread::sleep_for(milliseconds(master->TimeOut)); // experimental sleep time
     }
 }
 
