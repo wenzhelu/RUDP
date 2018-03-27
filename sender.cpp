@@ -122,6 +122,7 @@ void Sender::sending() {
         // the listener may need to change the curPtr when
         // packet loss happened
         if (pending) {
+            debug_print("timerBase: %u, sendBase: %u\n, RTT: %u, timeout: %u", timerBase, master->sendBase, master->RTT, master->TimeOut);
             if (master->sendBase - diff >= userDataLen) {
                 endTask();
                 continue;
