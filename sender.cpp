@@ -151,7 +151,8 @@ void Sender::sending() {
                 
                 // finally we are sending
                 master->sock->printPacket(false, master->buff, master->HEADER_LEN + len);
-                master->startTimes.insert(pair<uint, tp>(curPtr + len, system_clock::now()));
+//                master->startTimes.insert(pair<uint, tp>(curPtr + len, system_clock::now()));
+                master->startTimes[curPtr + len] = system_clock::now();
                 master->sock->write(master->buff, master->HEADER_LEN + len);
                 if (master->status == SLOW_START) master->slowStartNum++;
                 else if (master->status == CONG_AVOID) master->congestNum++;
