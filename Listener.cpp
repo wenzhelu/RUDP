@@ -161,7 +161,7 @@ void Listener::getTimeout(int ack)
 	}
     
 
-    this->sRTT=std::chrono::milliseconds((end-start).count()/1000000);
+    	this->sRTT=std::chrono::duration_cast<ms>(end - start).count();
 	int u,phi,delta;
 	u=1;
 	phi=4;
