@@ -48,7 +48,7 @@ void Sender::endTask() {
     master->setFinBit(0);
     busy.unlock();
     debug_print("send one file end\n", nullptr);
-    debug_print("RTT: %u\n", master->RTT);
+    debug_print("RTT: %u\n, slow start packets: %u, congestion avoidance packets: %u\n", master->RTT, master->slowStartNum, master->congestNum);
 }
 
 void Sender::timing() {
@@ -66,8 +66,6 @@ void Sender::timing() {
             // not rely on "send" behavior to avoid stuck in sending.
             if (timerBase >= master->sendBase) {
                 // data loss timeout!
-                // do we need to calculate timeout and RTT??
-                // do I need to do something about the map?
                 master->status = SLOW_START;
                 master->throughput = master->cWnd >> 1;
                 master->cWnd = RUDP::PACKET_SIZE;

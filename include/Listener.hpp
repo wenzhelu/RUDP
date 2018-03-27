@@ -13,10 +13,8 @@ public:
     RUDP *master;
 	static const int control=8;
     uint totalrec;
-    uint slowNum;
-    uint caNum;
 
-    Listener(RUDP *m){duplicateACK=ACKcwnd=totalrec=caNum=slowNum=0; master = m;};
+    Listener(RUDP *m){duplicateACK=ACKcwnd=totalrec=0; master = m;};
 	void recAns();
 	void update(unsigned int sendbase);
 	void fastRecovery();

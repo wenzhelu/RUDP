@@ -50,6 +50,8 @@ void RUDP::init(uint window, const char *port, const char *remoteIp, const char 
     this->RTT = 500;
     this->TimeOut = 3000;
     this->throughput = 100000000;
+    this->congestNum = 0;
+    this->slowStartNum = 0;
     
     this->sock = new Usock();
     this->sock->init(port, remoteIp, remotePort);

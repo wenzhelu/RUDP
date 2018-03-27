@@ -70,6 +70,9 @@ public:
     Usock *sock;
     thread *th_listener;
     thread *th_sender;
+    
+    uint slowStartNum;
+    uint congestNum;
 //    static uint timeout;      // we decide to let timer to set RTT
     
     // in charge of setting default parameters and

@@ -35,7 +35,6 @@ void Listener::recAns()
                 s[4]++;
                 fs.close();
                 debug_print("Received new file!\n", nullptr);
-                debug_print("slow start: %u packets, congestion avoidence: %u packets\n",this->slowNum,this->caNum);
 //                debug_print("RTT time: %u ms\n",this->eRTT);
                 break;
             }
@@ -82,7 +81,7 @@ void Listener::update(unsigned int ack)
 {
 	if(master->status==statusEnum::SLOW_START)
 	{
-        this->slowNum++;
+        master->slowStartNum++;
 		if(ack==master->sendBase)
 		{
 			this->duplicateACK+=1;
@@ -110,7 +109,7 @@ void Listener::update(unsigned int ack)
     	}	
 	else
 	{
-        this->caNum++;
+        master->congestNum++;
 		if(ack==master->sendBase)
 		{
 			this->duplicateACK+=1;
@@ -168,8 +167,8 @@ void Listener::getTimeout(int ack)
 	delta=2;
 	this->eRTT=this->eRTT+std::chrono::milliseconds((this->sRTT.count()-this->eRTT.count())/delta);
 	this->deviation=this->deviation+std::chrono::milliseconds(abs(this->sRTT.count()-this->eRTT.count())/delta-this->deviation.count());
-//    master->TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
-//    master->RTT=this->eRTT.count();
+    master->TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
+    master->RTT=this->eRTT.count();
 }
 
 bool Listener::randomdrop(double n)
