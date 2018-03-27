@@ -64,6 +64,7 @@ void Sender::timing() {
             // if sendBase larger than sendBase, we have a time out.
             // Why called aggressive mode? we make timer very active and
             // not rely on "send" behavior to avoid stuck in sending.
+	    debug_print("timerBase: %u, sendBase: %u\n", timerBase, master->sendBase);
             if (timerBase >= master->sendBase) {
                 // data loss timeout!
                 master->status = SLOW_START;
