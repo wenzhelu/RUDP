@@ -23,7 +23,7 @@ void Listener::recAns()
             bool databit=false;
             bool ackbit=false;
             recbits=master->sock->read(rec,1472);
-            this_thread::sleep_for(ms(50));
+            //this_thread::sleep_for(ms(50));
             //    printf("%d bytes received\n",recbits);
             //    printf("sequence num: %u \n",*(uint*)rec);
             if(rec[Listener::control]>>7)
@@ -39,7 +39,7 @@ void Listener::recAns()
                 break;
             }
             
-            if(!randomdrop(0.0) || ackbit)
+            if(!randomdrop(0.1) || ackbit)
             {
                 debug_print("Not dropping this packet\n", nullptr);
                 if(ackbit)
@@ -151,8 +151,9 @@ void Listener::getTimeout(int ack)
 {
 	tp end=std::chrono::system_clock::now();
 	tp start;
-	if(master->startTimes.find(ack)==master->startTimes.end())
-		printf("ack error\n");
+	if(master->startTimes.find(ack)==master->startTimes.end()) {
+		return;
+	}
 	else
 	{
 		start=master->startTimes.at(ack);
