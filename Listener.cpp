@@ -39,7 +39,7 @@ void Listener::recAns()
                 break;
             }
             
-            if(!randomdrop(0.1))
+            if(!randomdrop(0.3))
             {
                 debug_print("Not dropping this packet\n", nullptr);
                 if(ackbit)
