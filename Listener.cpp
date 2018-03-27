@@ -163,7 +163,7 @@ void Listener::getTimeout(int ack)
     }
     
     
-    this->sRTT=ms((end - start).count()/1000);
+    this->sRTT=ms((end - start).count()/1000000);
     int u,phi,delta;
     u=1;
     phi=4;
