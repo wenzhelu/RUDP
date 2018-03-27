@@ -39,7 +39,7 @@ void Listener::recAns()
                 break;
             }
             
-            if(!randomdrop(0.1) || ackbit)
+            if(!randomdrop(0.3))
             {
                 debug_print("Not dropping this packet\n", nullptr);
                 if(ackbit)
@@ -130,6 +130,7 @@ void Listener::fastRecovery()
     master->cWnd=master->throughput;
     master->status=statusEnum::FAST_REC;
     master->sender->resend = true;
+    debug_print("Duplicate ACK happens\n", nullptr);
 }
 void Listener::index(unsigned int ack)
 {
@@ -170,7 +171,7 @@ void Listener::getTimeout(int ack)
     this->deviation=this->deviation+std::chrono::milliseconds(abs(this->sRTT.count()-this->eRTT.count())/delta-this->deviation.count());
     master->TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
     master->RTT=this->eRTT.count();
-    debug_print("Timeout: %u, RTT: %u, sRTT: %u, all in ms\n", master->TimeOut, master->RTT, sRTT.count());
+//    debug_print("Timeout: %u, RTT: %u, sRTT: %u, all in ms\n", master->TimeOut, master->RTT, sRTT.count());
 }
 
 bool Listener::randomdrop(double n)
