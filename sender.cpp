@@ -77,7 +77,7 @@ void Sender::timing() {
                 sendTime = cur;
             }
         }
-        this_thread::sleep_for(milliseconds(master->TimeOut)); // experimental sleep time
+        this_thread::sleep_for(milliseconds(std::min((uint)200, master->TimeOut))); // experimental sleep time
     }
 }
 
@@ -118,7 +118,7 @@ void Sender::send(const char *buffer, size_t len) {
 // the sending thread will loop in this function
 void Sender::sending() {
     while (!master->close) {
-        this_thread::sleep_for(chrono::milliseconds(master->RTT >> 2)); // sleep time need to test
+        this_thread::sleep_for(chrono::milliseconds(50)); // sleep time need to test
         // we are making somehow dangerous assumption here.
         // the listener may need to change the curPtr when
         // packet loss happened
