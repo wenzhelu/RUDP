@@ -77,7 +77,7 @@ void Sender::timing() {
                 sendTime = cur;
             }
         }
-        this_thread::sleep_for(milliseconds(std::min((uint)200, master->TimeOut))); // experimental sleep time
+        this_thread::sleep_for(milliseconds(master->TimeOut >> 1)); // experimental sleep time
     }
 }
 
