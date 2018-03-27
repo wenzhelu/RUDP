@@ -35,7 +35,7 @@ void Listener::recAns()
                 s[4]++;
                 fs.close();
                 debug_print("Received new file!\n", nullptr);
-//                debug_print("RTT time: %u ms\n",this->eRTT);
+                //                debug_print("RTT time: %u ms\n",this->eRTT);
                 break;
             }
             
@@ -79,100 +79,101 @@ void Listener::recAns()
 
 void Listener::update(unsigned int ack)
 {
-	if(master->status==statusEnum::SLOW_START)
-	{
-//        master->slowStartNum++;
-		if(ack==master->sendBase)
-		{
-			this->duplicateACK+=1;
-			if(this->duplicateACK==3)
-				this->fastRecovery();
-		}
-		else
-		{
-			this->index(ack);
-			if(master->cWnd>=master->throughput)
-				master->status=statusEnum::CONG_AVOID;
-		}
-	}
-	else if(master->status==statusEnum::FAST_REC)
-	{
-		if(ack==master->sendBase)
+    if(master->status==statusEnum::SLOW_START)
+    {
+        //        master->slowStartNum++;
+        if(ack==master->sendBase)
+        {
+            this->duplicateACK+=1;
+            if(this->duplicateACK==3)
+                this->fastRecovery();
+        }
+        else
+        {
+            this->index(ack);
+            if(master->cWnd>=master->throughput)
+                master->status=statusEnum::CONG_AVOID;
+        }
+    }
+    else if(master->status==statusEnum::FAST_REC)
+    {
+        if(ack==master->sendBase)
             ;
-		else
-		{
-			
-			master->status=statusEnum::CONG_AVOID;
-			this->linear(ack);
-		}
-		
-    	}	
-	else
-	{
-//        master->congestNum++;
-		if(ack==master->sendBase)
-		{
-			this->duplicateACK+=1;
-			if(this->duplicateACK==3)
-				this->fastRecovery();
-		}
-		else
-		{
-			this->linear(ack);
-		}	
-	}
+        else
+        {
+            
+            master->status=statusEnum::CONG_AVOID;
+            this->linear(ack);
+        }
+        
+    }
+    else
+    {
+        //        master->congestNum++;
+        if(ack==master->sendBase)
+        {
+            this->duplicateACK+=1;
+            if(this->duplicateACK==3)
+                this->fastRecovery();
+        }
+        else
+        {
+            this->linear(ack);
+        }
+    }
 }
-	
+
 void Listener::fastRecovery()
 {
-	this->duplicateACK=0;
-	master->throughput=master->cWnd/2;
-	master->cWnd=master->throughput;
-	master->status=statusEnum::FAST_REC;
+    this->duplicateACK=0;
+    master->throughput=master->cWnd/2;
+    master->cWnd=master->throughput;
+    master->status=statusEnum::FAST_REC;
     master->sender->resend = true;
 }
 void Listener::index(unsigned int ack)
 {
-	master->cWnd+=(ack-master->sendBase);
-	if(master->cWnd>master->winSize)
-		master->cWnd=master->winSize;
-	master->sendBase=ack;
+    master->cWnd+=(ack-master->sendBase);
+    if(master->cWnd>master->winSize)
+        master->cWnd=master->winSize;
+    master->sendBase=ack;
 }
 void Listener::linear(unsigned int ack)
 {
-	this->ACKcwnd+=(ack-master->sendBase);
-	master->cWnd+=(ACKcwnd*master->PACKET_SIZE)/master->cWnd;
-	if(master->cWnd>master->winSize)
-		master->cWnd=master->winSize;
-	this->ACKcwnd=0;
-	master->sendBase=ack;
+    this->ACKcwnd+=(ack-master->sendBase);
+    master->cWnd+=(ACKcwnd*master->PACKET_SIZE)/master->cWnd;
+    if(master->cWnd>master->winSize)
+        master->cWnd=master->winSize;
+    this->ACKcwnd=0;
+    master->sendBase=ack;
 }
 void Listener::getTimeout(int ack)
 {
-	tp end=std::chrono::system_clock::now();
-	tp start;
-	if(master->startTimes.find(ack)==master->startTimes.end()) {
-		return;
-	}
-	else
-	{
-		start=master->startTimes.at(ack);
-		master->startTimes.erase(master->startTimes.begin(),++master->startTimes.find(ack));
-	}
+    tp end=std::chrono::system_clock::now();
+    tp start;
+    if(master->startTimes.find(ack)==master->startTimes.end()) {
+        return;
+    }
+    else
+    {
+        start=master->startTimes.at(ack);
+        master->startTimes.erase(master->startTimes.begin(),++master->startTimes.find(ack));
+    }
     
-
-    	this->sRTT=std::chrono::duration_cast<ms>(end - start).count();
-	int u,phi,delta;
-	u=1;
-	phi=4;
-	delta=2;
-	this->eRTT=this->eRTT+std::chrono::milliseconds((this->sRTT.count()-this->eRTT.count())/delta);
-	this->deviation=this->deviation+std::chrono::milliseconds(abs(this->sRTT.count()-this->eRTT.count())/delta-this->deviation.count());
+    
+    this->sRTT=ms((end - start).count()/1000000);
+    int u,phi,delta;
+    u=1;
+    phi=4;
+    delta=2;
+    this->eRTT=this->eRTT+std::chrono::milliseconds((this->sRTT.count()-this->eRTT.count())/delta);
+    this->deviation=this->deviation+std::chrono::milliseconds(abs(this->sRTT.count()-this->eRTT.count())/delta-this->deviation.count());
     master->TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
     master->RTT=this->eRTT.count();
+    debug_print("Timeout: %u, RTT: %u, sRTT: %u, all in ms\n", master->TimeOut, master->RTT, sRTT.count());
 }
 
 bool Listener::randomdrop(double n)
 {
-	return (rand()%100)<(100*n);
+    return (rand()%100)<(100*n);
 }

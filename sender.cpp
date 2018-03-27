@@ -64,7 +64,7 @@ void Sender::timing() {
             // if sendBase larger than sendBase, we have a time out.
             // Why called aggressive mode? we make timer very active and
             // not rely on "send" behavior to avoid stuck in sending.
-	    debug_print("timerBase: %u, sendBase: %u\n", timerBase, master->sendBase);
+//            debug_print("timerBase: %u, sendBase: %u\n", timerBase, master->sendBase);
             if (timerBase >= master->sendBase) {
                 // data loss timeout!
                 master->status = SLOW_START;
@@ -123,7 +123,7 @@ void Sender::sending() {
         // the listener may need to change the curPtr when
         // packet loss happened
         if (pending) {
-            debug_print("timerBase: %u, sendBase: %u, RTT: %u, timeout: %u\n", timerBase, master->sendBase, master->RTT, master->TimeOut);
+//            debug_print("timerBase: %u, sendBase: %u, RTT: %u, timeout: %u\n", timerBase, master->sendBase, master->RTT, master->TimeOut);
             if (master->sendBase - diff >= userDataLen) {
                 endTask();
                 continue;
