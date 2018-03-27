@@ -17,6 +17,7 @@ void Listener::recAns()
         fs.open(s, ios::trunc | ios::out);
         while(1)
         {
+            this_thread::sleep_for(ms(25)); // sleep for a while
             int recbits;
             char rec[1472];
             //        char databuf[1460];
@@ -171,7 +172,7 @@ void Listener::getTimeout(int ack)
     this->deviation=this->deviation+std::chrono::milliseconds(abs(this->sRTT.count()-this->eRTT.count())/delta-this->deviation.count());
     master->TimeOut=u*this->eRTT.count()+phi*this->deviation.count();
     master->RTT=this->eRTT.count();
-//    debug_print("Timeout: %u, RTT: %u, sRTT: %u, all in ms\n", master->TimeOut, master->RTT, sRTT.count());
+    debug_print("Timeout: %u, RTT: %u, sRTT: %u, all in ms\n", master->TimeOut, master->RTT, sRTT.count());
 }
 
 bool Listener::randomdrop(double n)
