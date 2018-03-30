@@ -20,7 +20,7 @@ int main(int argc, const char **argv) {
     return 1;
 //#endif
     
-//    if (argc != 4) {
+//    
 //        using namespace std;
 //        cout << "usage:\n ./rudp local_port remote_ip remote_port" << endl;
 //    }

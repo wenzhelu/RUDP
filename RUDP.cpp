@@ -72,8 +72,8 @@ void RUDP::shutdown() {
 void RUDP::cleanUp() {
     // release resources like socket and heap memory
     sock->closeSock();
-    delete sender;
-    delete listener;
     delete th_listener;
     delete th_sender;
+    delete sender;
+    delete listener;
 }
